@@ -1,0 +1,167 @@
+version: '3.9'
+
+services:
+  # ====================
+  # MV1 - BASE DE DATOS
+  # ====================
+  db1:
+    build:
+      context: .
+      dockerfile: ./DB1/Dockerfile.DB1
+    container_name: db1
+    profiles: ["mv1"]
+    environment:
+      - NODE_ID=DB1
+      - GRPC_PORT=51000
+      - PEERS=db2:52000,db3:53000
+      - N=3
+      - W=2
+      - R=2
+    networks:
+      - red_global
+    ports:
+      - "51000:51000"
+
+  db2:
+    build:
+      context: .
+      dockerfile: ./DB2/Dockerfile.DB2
+    container_name: db2
+    profiles: ["mv1"]
+    environment:
+      - NODE_ID=DB2
+      - GRPC_PORT=52000
+      - PEERS=db1:51000,db3:53000
+      - N=3
+      - W=2
+      - R=2
+    networks:
+      - red_global
+    ports:
+      - "52000:52000"
+
+  db3:
+    build:
+      context: .
+      dockerfile: ./DB3/Dockerfile.DB3
+    container_name: db3
+    profiles: ["mv1"]
+    environment:
+      - NODE_ID=DB3
+      - GRPC_PORT=53000
+      - PEERS=db1:51000,db2:52000
+      - N=3
+      - W=2
+      - R=2
+    networks:
+      - red_global
+    ports:
+      - "53000:53000"
+
+  # ====================
+  # MV2 - CONSUMIDORES
+  # ====================
+  consumidor1:
+    build:
+      context: .
+      dockerfile: ./consumidor1/Dockerfile.consumidor1
+    container_name: consumidor1
+    profiles: ["mv2"]
+    environment:
+      - SERVICE_NAME=consumidor1
+      - BROKER_HOST=broker:54000
+    networks:
+      - red_global
+
+  consumidor2:
+    build:
+      context: .
+      dockerfile: ./consumidor2/Dockerfile.consumidor2
+    container_name: consumidor2
+    profiles: ["mv2"]
+    environment:
+      - SERVICE_NAME=consumidor2
+      - BROKER_HOST=broker:54000
+    networks:
+      - red_global
+
+  consumidor3:
+    build:
+      context: .
+      dockerfile: ./consumidor3/Dockerfile.consumidor3
+    container_name: consumidor3
+    profiles: ["mv2"]
+    environment:
+      - SERVICE_NAME=consumidor3
+      - BROKER_HOST=broker:54000
+    networks:
+      - red_global
+
+  # ====================
+  # MV3 - TIENDAS
+  # ====================
+  riploy:
+    build:
+      context: .
+      dockerfile: ./riploy/Dockerfile.riploy
+    container_name: riploy
+    profiles: ["mv3"]
+    environment:
+      - SERVICE_NAME=riploy
+      - GRPC_PORT=51110
+      - DB_HOST=db1:51000
+      - BROKER_HOST=broker:54000
+    networks:
+      - red_global
+
+  falabellox:
+    build:
+      context: .
+      dockerfile: ./falabellox/Dockerfile.falabellox
+    container_name: falabellox
+    profiles: ["mv3"]
+    environment:
+      - SERVICE_NAME=falabellox
+      - GRPC_PORT=52220
+      - DB_HOST=db2:52000
+      - BROKER_HOST=broker:54000
+    networks:
+      - red_global
+
+  parisio:
+    build:
+      context: .
+      dockerfile: ./parisio/Dockerfile.parisio
+    container_name: parisio
+    profiles: ["mv3"]
+    environment:
+      - SERVICE_NAME=parisio
+      - GRPC_PORT=53330
+      - DB_HOST=db3:53000
+      - BROKER_HOST=broker:54000
+    networks:
+      - red_global
+
+  # ====================
+  # MV4 - BROKER
+  # ====================
+  broker:
+    build:
+      context: .
+      dockerfile: ./broker/Dockerfile.broker
+    container_name: broker
+    profiles: ["mv4"]
+    environment:
+      - SERVICE_NAME=broker
+      - GRPC_PORT=54000
+    ports:
+      - "55000:54000"
+    networks:
+      - red_global
+
+# ====================
+# RED GLOBAL
+# ====================
+networks:
+  red_global:
+    driver: bridge

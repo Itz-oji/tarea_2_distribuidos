@@ -1,0 +1,24 @@
+
+#MV1 ejecucion
+- docker compose --profile mv1 up   # MV1: Riploy + DB1 + Consumidor2
+
+#MV2 ejecucion
+- docker compose --profile mv2 up   # MV2: Falabellox + DB2 + Consumidor3
+
+#MV3 ejecucion
+- docker compose --profile mv3 up   # MV3: Parisio + DB3
+
+#MV4 ejecucion
+- docker compose --profile mv4 up   # MV4: Broker + Consumidor1
+
+
+broken: 54000
+DB1: 51000
+DB2: 52000
+BD3: 53000
+riploy: 51110
+falabellox: 52220
+parisio: 53330
+consumidor1: 54100
+consumidor2: 51100
+consumidor3: 52200

@@ -1,0 +1,19 @@
+FROM golang:1.24 AS builder
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY proto ./proto
+COPY parisio/parisio.go ./
+COPY parisio/parisio_catalogo.csv ./
+
+RUN go build -o parisio parisio.go
+
+FROM gcr.io/distroless/base-debian12
+WORKDIR /app
+
+COPY --from=builder /app/parisio ./
+COPY --from=builder /app/parisio_catalogo.csv ./
+
+CMD ["./parisio"]

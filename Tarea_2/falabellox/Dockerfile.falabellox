@@ -1,0 +1,19 @@
+FROM golang:1.24 AS builder
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY proto ./proto
+COPY falabellox/falabellox.go ./
+COPY falabellox/falabellox_catalogo.csv ./
+
+RUN go build -o falabellox falabellox.go
+
+FROM gcr.io/distroless/base-debian12
+WORKDIR /app
+
+COPY --from=builder /app/falabellox ./
+COPY --from=builder /app/falabellox_catalogo.csv ./
+
+CMD ["./falabellox"]

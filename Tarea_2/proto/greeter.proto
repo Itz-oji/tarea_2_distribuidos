@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package heint;
+
+option go_package = "/proto";
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                       F U N C I O N E S  G E N E R A L E S                 //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+message Response {
+    string mensaje = 1;
+}
+
+message Offer {
+    string oferta_id = 1;
+    string producto_id = 2;
+    string tienda = 3;
+    string categoria = 4;
+    string producto = 5;
+    double precio = 6;
+    int32 stock = 7;
+    int64 fecha = 8;
+}
+
+message HistoryRequest {
+    string consumidor_id = 1;
+}
+
+message RegisterRequest {
+    string producer_id = 1;
+    string store = 2;
+}
+
+message RegisterResponse {
+    bool ok = 1;
+    string message = 2;
+}
+
+message HistoryResponse {
+    repeated Offer offers = 1; 
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             S E R V I C I O    D E   B R O K E R           //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+service BrokerService {
+    // Recibe una oferta de un productor
+    rpc SendOffer (Offer) returns (Response);
+
+    // Permite a los consumidores consultar su historial de ofertas
+    rpc GetHistory (HistoryRequest) returns (HistoryResponse);
+
+    // Registro de productores antes de enviar ofertas
+    rpc RegisterProducer (RegisterRequest) returns (RegisterResponse);
+
+    // Envía la oferta a todos los nodos de la base de datos
+    rpc SendOfferToNodes (Offer) returns (Response);
+}
+
